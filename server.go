@@ -2,8 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	//"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -47,12 +51,32 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if registerModel.Password == registerModel.PasswordConfirmation {
+	if registerModel.Password != registerModel.PasswordConfirmation {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	user, err := loadUserByEmail(registerModel.Email)
+	if err != nil {
+		if err != mgo.ErrNotFound {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Println(err)
+			return
+		}
+	}
+
+	if user != nil {
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
+
+	if err = saveUser(registerModel); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }
 
 //LoginHandler represens the handler of the login action
@@ -77,6 +101,18 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func getSession() (*mgo.Session, error) {
+	di := &mgo.DialInfo{
+		Addrs:    []string{"localhost:27017"},
+		Database: "Auth",
+	}
+	session, err := mgo.DialWithInfo(di)
+	if err != nil {
+		return nil, err
+	}
+	return session, nil
+}
+
 //RegisterModel structure is represent the entoty to add
 type RegisterModel struct {
 	Firstname            string `json:"firstname"`
@@ -91,4 +127,65 @@ type RegisterModel struct {
 type LoginModel struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+//User represents the user model inside database
+type User struct {
+	ID        bson.ObjectId `bson:"_id" json:"id"`
+	Email     string        `bson:"email" json:"email"`
+	Firstname string        `bson:"firstname" json:"firstname"`
+	Lastname  string        `bson:"lastname" json:"lastname"`
+	Password  string        `bson:"password" json:"password"`
+	Phone     string        `bson:"phone" json:"phone"`
+}
+
+func getUsers() (*[]User, error) {
+	session, err := getSession()
+	if err != nil {
+		return nil, err
+	}
+	defer session.Close()
+
+	var users []User
+	if err = session.DB("Auth").C("Users").Find(nil).All(&users); err != nil {
+		return nil, err
+	}
+
+	return &users, nil
+}
+
+func loadUserByEmail(email string) (*User, error) {
+	session, err := getSession()
+	if err != nil {
+		return nil, err
+	}
+	defer session.Close()
+
+	var user User
+	if err = session.DB("Auth").C("Users").Find(bson.M{"email": email}).One(&user); err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func saveUser(model *RegisterModel) error {
+	session, err := getSession()
+	if err != nil {
+		return err
+	}
+	defer session.Close()
+
+	user := User{
+		ID:        bson.NewObjectId(),
+		Firstname: model.Firstname,
+		Lastname:  model.Lastname,
+		Email:     model.Email,
+		Phone:     model.Phone,
+	}
+	if err = session.DB("Auth").C("Users").Insert(user); err != nil {
+		return err
+	}
+
+	return nil
 }
