@@ -1,0 +1,14 @@
+{
+ "web": {
+	"port": ":8080"	 
+},
+ "db": {
+	"host": "localhost",
+	"port": ":27017",
+	"database": "users"
+  },
+  "security": {
+	"saltLength": 50,
+	"bcryptCost": 14
+  }
+}

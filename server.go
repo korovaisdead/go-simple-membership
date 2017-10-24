@@ -17,13 +17,23 @@ import (
 	"time"
 )
 
+var (
+	config *Configuration
+)
+
 func main() {
+	c, err := loadConfig()
+	if err != nil {
+		panic(err)
+	}
+	config = c
+
 	var router *mux.Router
 	router = mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/register", RegisterHandler).Methods(http.MethodPost)
 	router.HandleFunc("/authenticate", LoginHandler).Methods(http.MethodPost)
 
-	if err := http.ListenAndServe(":8080", handlers.LoggingHandler(os.Stdout, router)); err != nil {
+	if err := http.ListenAndServe(config.Web.Port, handlers.LoggingHandler(os.Stdout, router)); err != nil {
 		panic(err)
 	}
 
@@ -101,13 +111,24 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user, err := loadUserByEmail(loginModel.Email)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginModel.Password+user.Salt)); err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func getSession() (*mgo.Session, error) {
 	di := &mgo.DialInfo{
-		Addrs:    []string{"localhost:27017"},
-		Database: "Auth",
+		Addrs:    []string{config.Db.Host + config.Db.Port},
+		Database: config.Db.Database,
 	}
 	session, err := mgo.DialWithInfo(di)
 	if err != nil {
@@ -179,11 +200,13 @@ func saveUser(model *RegisterModel) error {
 		return err
 	}
 	defer session.Close()
+
 	salt := getRandomString()
-	hash, err := bcrypt.GenerateFromPassword([]byte(model.Password+salt), 12)
+	hash, err := bcrypt.GenerateFromPassword([]byte(model.Password+salt), config.Security.BcryptCost)
 	if err != nil {
 		return err
 	}
+
 	user := User{
 		ID:        bson.NewObjectId(),
 		Firstname: model.Firstname,
@@ -193,16 +216,47 @@ func saveUser(model *RegisterModel) error {
 		Password:  string(hash),
 		Salt:      salt,
 	}
+
 	return session.DB("Auth").C("Users").Insert(user)
 }
 
 func getRandomString() string {
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	rand.Seed(time.Now().UnixNano())
-	b := make([]rune, 50)
+	b := make([]rune, config.Security.SaltLength)
 	for i := range b {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 
 	return string(b)
+}
+
+type Configuration struct {
+	Web struct {
+		Port string `json:"port"`
+	} `json:"web"`
+	Db struct {
+		Host     string `json:"host"`
+		Port     string `json:"port"`
+		Database string `json:"database"`
+	} `json:"db"`
+	Security struct {
+		SaltLength int `json:"saltLength"`
+		BcryptCost int `json:"bcryptCost"`
+	} `json:"security"`
+}
+
+func loadConfig() (*Configuration, error) {
+	file, err := os.Open("config.local.json")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	config := &Configuration{}
+	if err = decoder.Decode(config); err != nil {
+		return nil, err
+	}
+	return config, nil
 }
