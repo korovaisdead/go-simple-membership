@@ -6,12 +6,15 @@ import (
 	//"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -137,6 +140,7 @@ type User struct {
 	Lastname  string        `bson:"lastname" json:"lastname"`
 	Password  string        `bson:"password" json:"password"`
 	Phone     string        `bson:"phone" json:"phone"`
+	Salt      string        `bson:"salt" json:"salt"`
 }
 
 func getUsers() (*[]User, error) {
@@ -175,17 +179,30 @@ func saveUser(model *RegisterModel) error {
 		return err
 	}
 	defer session.Close()
-
+	salt := getRandomString()
+	hash, err := bcrypt.GenerateFromPassword([]byte(model.Password+salt), 12)
+	if err != nil {
+		return err
+	}
 	user := User{
 		ID:        bson.NewObjectId(),
 		Firstname: model.Firstname,
 		Lastname:  model.Lastname,
 		Email:     model.Email,
 		Phone:     model.Phone,
+		Password:  string(hash),
+		Salt:      salt,
 	}
-	if err = session.DB("Auth").C("Users").Insert(user); err != nil {
-		return err
+	return session.DB("Auth").C("Users").Insert(user)
+}
+
+func getRandomString() string {
+	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	rand.Seed(time.Now().UnixNano())
+	b := make([]rune, 50)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 
-	return nil
+	return string(b)
 }
