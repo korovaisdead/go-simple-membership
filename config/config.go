@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
@@ -31,12 +32,14 @@ func GetConfig() (*Configuration, error) {
 
 	file, err := os.Open("config.local.json")
 	if err != nil {
+		fmt.Println("Error importing the config file")
 		return nil, err
 	}
 	defer file.Close()
 
 	decoder := json.NewDecoder(file)
-	if err = decoder.Decode(config); err != nil {
+	if err = decoder.Decode(&config); err != nil {
+		fmt.Println("Error decoding the configuration file")
 		return nil, err
 	}
 	return config, nil

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	//"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -17,6 +18,7 @@ var (
 func main() {
 	config, err := c.GetConfig()
 	if err != nil {
+		fmt.Errorf(err.Error())
 		panic(err)
 	}
 
