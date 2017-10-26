@@ -117,7 +117,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenString, err := getToken()
+	tokenString, err := getToken(string(user.ID))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -134,13 +134,17 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func getToken() (*string, error) {
+func getToken(id string) (*string, error) {
 	c, err := config.GetConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	claims := &jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Minute * 60).Unix()}
+	claims := &MyCustomClaims{
+		id,
+		jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Minute * 60).Unix()},
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(c.Security.Hmac))
 	if err != nil {
@@ -148,4 +152,9 @@ func getToken() (*string, error) {
 	}
 
 	return &tokenString, nil
+}
+
+type MyCustomClaims struct {
+	Id string `json:"id"`
+	jwt.StandardClaims
 }
