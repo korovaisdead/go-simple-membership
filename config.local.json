@@ -9,6 +9,7 @@
   },
   "security": {
 	"saltLength": 50,
-	"bcryptCost": 14
+	"bcryptCost": 14,
+	"hmac":"some-secret-word"
   }
 }

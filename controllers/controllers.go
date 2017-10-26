@@ -3,12 +3,15 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/korovaisdead/go-simple-membership/config"
 	"github.com/korovaisdead/go-simple-membership/storage"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/mgo.v2"
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 )
 
 //RegisterModel structure is represent the entoty to add
@@ -25,6 +28,10 @@ type RegisterModel struct {
 type LoginModel struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type AuthResponse struct {
+	Token string `json:"token"`
 }
 
 //RegisterHandler is the function to handle the registration requests
@@ -81,6 +88,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 //LoginHandler represens the handler of the login action
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -109,5 +117,35 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	tokenString, err := getToken()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	response, err := json.Marshal(&AuthResponse{*tokenString})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte(response))
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+}
+
+func getToken() (*string, error) {
+	c, err := config.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	claims := &jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Minute * 60).Unix()}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(c.Security.Hmac))
+	if err != nil {
+		return nil, err
+	}
+
+	return &tokenString, nil
 }

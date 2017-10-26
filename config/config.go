@@ -20,8 +20,9 @@ type Configuration struct {
 		Database string `json:"database"`
 	} `json:"db"`
 	Security struct {
-		SaltLength int `json:"saltLength"`
-		BcryptCost int `json:"bcryptCost"`
+		SaltLength int    `json:"saltLength"`
+		BcryptCost int    `json:"bcryptCost"`
+		Hmac       string `json:"hmac"`
 	} `json:"security"`
 }
 

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	//"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	c "github.com/korovaisdead/go-simple-membership/config"
