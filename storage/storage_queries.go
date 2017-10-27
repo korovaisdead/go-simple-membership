@@ -79,3 +79,14 @@ func getRandomString() string {
 
 	return string(b)
 }
+
+//User represents the user model inside database
+type User struct {
+	ID        bson.ObjectId `bson:"_id" json:"id"`
+	Email     string        `bson:"email" json:"email"`
+	Firstname string        `bson:"firstname" json:"firstname"`
+	Lastname  string        `bson:"lastname" json:"lastname"`
+	Password  string        `bson:"password" json:"password"`
+	Phone     string        `bson:"phone" json:"phone"`
+	Salt      string        `bson:"salt" json:"salt"`
+}
