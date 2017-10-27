@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	c "github.com/korovaisdead/go-simple-membership/config"
@@ -15,9 +14,8 @@ var (
 )
 
 func main() {
-	config, err := c.GetConfig()
+	config, err := c.BuildConfig("local")
 	if err != nil {
-		fmt.Errorf(err.Error())
 		panic(err)
 	}
 

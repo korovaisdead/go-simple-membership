@@ -148,7 +148,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getToken(id string) (*string, error) {
-	c := config.Get()
+	c:= config.Get()
+	if err != nil {
+		return nil, err
+	}
 
 	claims := &AuthClaims{
 		id,
