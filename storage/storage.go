@@ -38,6 +38,11 @@ type User struct {
 }
 
 func GetUsers() (*[]User, error) {
+	config, err := c.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+
 	session, err := getSession()
 	if err != nil {
 		return nil, err
@@ -45,7 +50,7 @@ func GetUsers() (*[]User, error) {
 	defer session.Close()
 
 	var users []User
-	if err = session.DB("Auth").C("Users").Find(nil).All(&users); err != nil {
+	if err = session.DB(config.Db.Database).C("Users").Find(nil).All(&users); err != nil {
 		return nil, err
 	}
 
@@ -53,6 +58,11 @@ func GetUsers() (*[]User, error) {
 }
 
 func LoadUserByEmail(email string) (*User, error) {
+	config, err := c.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+
 	session, err := getSession()
 	if err != nil {
 		return nil, err
@@ -60,7 +70,7 @@ func LoadUserByEmail(email string) (*User, error) {
 	defer session.Close()
 
 	var user User
-	if err = session.DB("Auth").C("Users").Find(bson.M{"email": email}).One(&user); err != nil {
+	if err = session.DB(config.Db.Database).C("Users").Find(bson.M{"email": email}).One(&user); err != nil {
 		return nil, err
 	}
 
@@ -95,7 +105,7 @@ func SaveUser(firstname, lastname, email, phone, password string) error {
 		Salt:      salt,
 	}
 
-	return session.DB("Auth").C("Users").Insert(user)
+	return session.DB(config.Db.Database).C("Users").Insert(user)
 }
 
 func getRandomString() string {

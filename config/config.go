@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 )
@@ -30,8 +31,11 @@ func GetConfig() (*Configuration, error) {
 	if config != nil {
 		return config, nil
 	}
+	return nil, errors.New("Please run the Build function before")
+}
 
-	file, err := os.Open("config.local.json")
+func Build(env string) (*Configuration, error) {
+	file, err := os.Open(fmt.Sprintf("config.%v.json", env))
 	if err != nil {
 		fmt.Println("Error importing the config file")
 		return nil, err

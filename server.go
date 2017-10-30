@@ -15,7 +15,7 @@ var (
 )
 
 func main() {
-	config, err := c.GetConfig()
+	config, err := c.Build("local")
 	if err != nil {
 		fmt.Errorf(err.Error())
 		panic(err)

@@ -4,12 +4,12 @@
 },
  "db": {
 	"host": "localhost",
-	"port": ":27017",
+	"port": ":27018",
 	"database": "users"
   },
   "security": {
 	"saltLength": 50,
-	"bcryptCost": 8,
+	"bcryptCost": 14,
 	"hmac":"some-secret-word"
   }
 }

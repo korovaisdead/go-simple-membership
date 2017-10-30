@@ -123,6 +123,18 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	redisClient, err := storage.GetRedisClient()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	_, err = redisClient.Set(user.ID.Hex(), user.Email, time.Minute*60).Result()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	response, err := json.Marshal(&AuthResponse{*tokenString})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -142,7 +154,7 @@ func getToken(id string) (*string, error) {
 
 	claims := &MyCustomClaims{
 		id,
-		jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Minute * 60).Unix()},
+		jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Hour * 24).Unix()},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
