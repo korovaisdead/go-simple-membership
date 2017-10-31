@@ -11,20 +11,26 @@ var (
 	config *Configuration
 )
 
+type ConfigurationWeb struct {
+	Port string `json:"port"`
+}
+
+type ConfigurationDb struct {
+	Host     string `json:"host"`
+	Port     string `json:"port"`
+	Database string `json:"database"`
+}
+
+type ConfigurationSecurity struct {
+	SaltLength int    `json:"saltLength"`
+	BcryptCost int    `json:"bcryptCost"`
+	Hmac       string `json:"hmac"`
+}
+
 type Configuration struct {
-	Web struct {
-		Port string `json:"port"`
-	} `json:"web"`
-	Db struct {
-		Host     string `json:"host"`
-		Port     string `json:"port"`
-		Database string `json:"database"`
-	} `json:"db"`
-	Security struct {
-		SaltLength int    `json:"saltLength"`
-		BcryptCost int    `json:"bcryptCost"`
-		Hmac       string `json:"hmac"`
-	} `json:"security"`
+	Web      ConfigurationWeb      `json:"web"`
+	Db       ConfigurationDb       `json:"db"`
+	Security ConfigurationSecurity `json:"security"`
 }
 
 func GetConfig() (*Configuration, error) {
@@ -35,9 +41,10 @@ func GetConfig() (*Configuration, error) {
 }
 
 func Build(env string) (*Configuration, error) {
-	file, err := os.Open(fmt.Sprintf("config.%v.json", env))
+	filename := fmt.Sprintf("config.%v.json", env)
+	file, err := os.Open(filename)
 	if err != nil {
-		fmt.Println("Error importing the config file")
+		fmt.Println("Error importing the config file: ", filename)
 		return nil, err
 	}
 	defer file.Close()
@@ -48,4 +55,11 @@ func Build(env string) (*Configuration, error) {
 		return nil, err
 	}
 	return config, nil
+}
+
+func BuildTestConfig() {
+	config = &Configuration{
+		Web: ConfigurationWeb{Port: ""},
+		Db:  ConfigurationDb{Host: "localhost", Port: ":27018", Database: "test"},
+	}
 }

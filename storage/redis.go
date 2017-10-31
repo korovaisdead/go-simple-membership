@@ -12,6 +12,7 @@ func GetRedisClient() (*redis.Client, error) {
 	if redisClient != nil {
 		return redisClient, nil
 	}
+	//TODO(pavel): move to the configiration
 	redisClient = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
