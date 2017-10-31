@@ -58,8 +58,10 @@ func Build(env string) (*Configuration, error) {
 }
 
 func BuildTestConfig() {
-	config = &Configuration{
-		Web: ConfigurationWeb{Port: ""},
-		Db:  ConfigurationDb{Host: "localhost", Port: ":27018", Database: "test"},
+	if config == nil {
+		config = &Configuration{
+			Web: ConfigurationWeb{Port: ""},
+			Db:  ConfigurationDb{Host: "localhost", Port: ":27018", Database: "test"},
+		}
 	}
 }
