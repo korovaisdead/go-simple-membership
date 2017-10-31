@@ -5,14 +5,13 @@ import (
 	"github.com/korovaisdead/go-simple-membership/config"
 	"github.com/korovaisdead/go-simple-membership/utils/docker"
 	"os/exec"
-	"testing"
 )
 
 var (
 	mongoImage = "mongo"
 )
 
-func Setup(t *testing.T) string {
+func Setup() string {
 	config.BuildTestConfig()
 	if _, err := exec.LookPath("docker"); err != nil {
 		panic("Don't hace docker installed in os")
