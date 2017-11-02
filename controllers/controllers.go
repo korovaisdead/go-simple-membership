@@ -88,7 +88,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 //LoginHandler represens the handler of the login action
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

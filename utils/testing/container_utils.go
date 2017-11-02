@@ -3,6 +3,7 @@ package testing
 import (
 	"fmt"
 	"github.com/korovaisdead/go-simple-membership/config"
+	"github.com/korovaisdead/go-simple-membership/storage"
 	"github.com/korovaisdead/go-simple-membership/utils/docker"
 	"os/exec"
 )
@@ -13,6 +14,8 @@ var (
 
 func Setup() string {
 	config.BuildTestConfig()
+	storage.BuildTestRedisClient()
+
 	if _, err := exec.LookPath("docker"); err != nil {
 		panic("Don't hace docker installed in os")
 	}

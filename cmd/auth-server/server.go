@@ -26,6 +26,7 @@ func main() {
 		fmt.Errorf(err.Error())
 		panic(err)
 	}
+
 	var router *mux.Router
 	router = mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/register", controllers.RegisterHandler).Methods(http.MethodPost)
