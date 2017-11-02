@@ -2,27 +2,54 @@ package storage
 
 import (
 	"github.com/go-redis/redis"
+	"github.com/korovaisdead/go-simple-membership/config"
+	"time"
 )
 
 var (
-	redisClient *redis.Client
+	redisClient RedisCache
 )
 
-func GetRedisClient() (*redis.Client, error) {
-	if redisClient != nil {
-		return redisClient, nil
+type RedisCache interface {
+	Set(key string, value interface{}, expiration time.Duration) error
+}
+
+type RedisCacheImpl struct {
+	redisClient *redis.Client
+}
+
+func (r *RedisCacheImpl) Set(key string, value interface{}, expiration time.Duration) error {
+	_, err := r.redisClient.Set(key, value, expiration).Result()
+	if err != nil {
+		return err
 	}
-	//TODO(pavel): move to the configiration
-	redisClient = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+	return nil
+}
+
+func GetRedisClient() RedisCache {
+	if redisClient == nil {
+		panic("You should build the redis client before using it!")
+	}
+
+	return redisClient
+}
+
+func BuildRedisClient() error {
+	c, _ := config.GetConfig()
+	if redisClient != nil {
+		return nil
+	}
+
+	r := redis.NewClient(&redis.Options{
+		Addr:     c.Redis.Host + c.Redis.Port,
 		Password: "",
-		DB:       0,
+		DB:       c.Redis.Database,
 	})
 
-	_, err := redisClient.Ping().Result()
+	_, err := r.Ping().Result()
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	return redisClient, nil
+	redisClient = &RedisCacheImpl{r}
+	return nil
 }

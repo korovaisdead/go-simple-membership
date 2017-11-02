@@ -21,6 +21,12 @@ type ConfigurationDb struct {
 	Database string `json:"database"`
 }
 
+type ConfigurationRedis struct {
+	Host     string `json:"host"`
+	Port     string `json:"port"`
+	Database int    `json:"database"`
+}
+
 type ConfigurationSecurity struct {
 	SaltLength int    `json:"saltLength"`
 	BcryptCost int    `json:"bcryptCost"`
@@ -30,6 +36,7 @@ type ConfigurationSecurity struct {
 type Configuration struct {
 	Web      ConfigurationWeb      `json:"web"`
 	Db       ConfigurationDb       `json:"db"`
+	Redis    ConfigurationRedis    `json:"redis"`
 	Security ConfigurationSecurity `json:"security"`
 }
 

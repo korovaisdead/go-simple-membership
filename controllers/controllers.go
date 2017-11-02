@@ -123,13 +123,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redisClient, err := storage.GetRedisClient()
+	redisClient := storage.GetRedisClient()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	_, err = redisClient.Set(user.ID.Hex(), user.Email, time.Minute*60).Result()
+	err = redisClient.Set(user.ID.Hex(), user.Email, time.Minute*60)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
