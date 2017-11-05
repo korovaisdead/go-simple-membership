@@ -41,9 +41,9 @@ func BuildRedisClient() error {
 	}
 
 	r := redis.NewClient(&redis.Options{
-		Addr:     c.Redis.Host + c.Redis.Port,
+		Addr:     c.RedisUrl,
 		Password: "",
-		DB:       c.Redis.Database,
+		DB:       0,
 	})
 
 	_, err := r.Ping().Result()

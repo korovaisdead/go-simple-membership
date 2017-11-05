@@ -2,9 +2,9 @@ package testing
 
 import (
 	"fmt"
-	"github.com/korovaisdead/go-simple-membership/config"
 	"github.com/korovaisdead/go-simple-membership/storage"
 	"github.com/korovaisdead/go-simple-membership/utils/docker"
+	"os"
 	"os/exec"
 )
 
@@ -13,7 +13,7 @@ var (
 )
 
 func Setup() string {
-	config.BuildTestConfig()
+	os.Setenv("MONGO_URL", "localhost:27018")
 	storage.BuildTestRedisClient()
 
 	if _, err := exec.LookPath("docker"); err != nil {

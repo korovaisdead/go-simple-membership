@@ -11,18 +11,10 @@ import (
 	"os"
 )
 
-var (
-	config *c.Configuration
-)
-
 func main() {
-	config, err := c.Build("local")
-	if err != nil {
-		fmt.Errorf(err.Error())
-		panic(err)
-	}
-
-	if err = storage.BuildRedisClient(); err != nil {
+	config := c.Build()
+	fmt.Print(config)
+	if err := storage.BuildRedisClient(); err != nil {
 		fmt.Errorf(err.Error())
 		panic(err)
 	}
@@ -32,7 +24,7 @@ func main() {
 	router.HandleFunc("/register", controllers.RegisterHandler).Methods(http.MethodPost)
 	router.HandleFunc("/authenticate", controllers.LoginHandler).Methods(http.MethodPost)
 
-	if err := http.ListenAndServe(config.Web.Port, handlers.LoggingHandler(os.Stdout, router)); err != nil {
+	if err := http.ListenAndServe(":"+config.WebPort, handlers.LoggingHandler(os.Stdout, router)); err != nil {
 		panic(err)
 	}
 

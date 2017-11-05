@@ -157,7 +157,7 @@ func getToken(id string) (*string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(c.Security.Hmac))
+	tokenString, err := token.SignedString([]byte(c.SecuritySecretWorld))
 	if err != nil {
 		return nil, err
 	}
