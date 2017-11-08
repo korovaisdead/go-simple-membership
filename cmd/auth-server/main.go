@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	c "github.com/korovaisdead/go-simple-membership/config"
-	"github.com/korovaisdead/go-simple-membership/controllers"
-	"github.com/korovaisdead/go-simple-membership/storage"
+	c "github.com/korovaisdead/go-simple-membership/lib/config"
+	"github.com/korovaisdead/go-simple-membership/lib/controllers"
+	"github.com/korovaisdead/go-simple-membership/lib/storage"
 	"net/http"
 	"os"
 )

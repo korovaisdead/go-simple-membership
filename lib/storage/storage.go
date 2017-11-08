@@ -1,7 +1,7 @@
 package storage
 
 import (
-	c "github.com/korovaisdead/go-simple-membership/config"
+	c "github.com/korovaisdead/go-simple-membership/lib/config"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"

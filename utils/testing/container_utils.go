@@ -2,7 +2,7 @@ package testing
 
 import (
 	"fmt"
-	"github.com/korovaisdead/go-simple-membership/storage"
+	"github.com/korovaisdead/go-simple-membership/lib/storage"
 	"github.com/korovaisdead/go-simple-membership/utils/docker"
 	"os"
 	"os/exec"

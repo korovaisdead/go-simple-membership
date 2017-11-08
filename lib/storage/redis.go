@@ -2,7 +2,7 @@ package storage
 
 import (
 	"github.com/go-redis/redis"
-	"github.com/korovaisdead/go-simple-membership/config"
+	"github.com/korovaisdead/go-simple-membership/lib/config"
 	"time"
 )
 

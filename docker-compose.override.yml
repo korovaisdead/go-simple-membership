@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  auth:
+    volumes:
+        - "./:/go/src/github.com/korovaisdead/go-simple-membershipi/"
+    #command: [sh, -c, "echo YO && go get github.com/codegangsta/gin && gin run -d ./cmd/auth-server"]

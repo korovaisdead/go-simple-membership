@@ -1,0 +1,26 @@
+settings:
+  legacy:
+    force: false
+    interval: 100ms
+server:
+  status: false
+  open: false
+  host: localhost
+  port: 5001
+schema:
+- name: auth
+  path: /Users/Pavel/src/go/src/github.com/korovaisdead/go-simple-membership/cmd/auth-server
+  commands:
+    vet:
+      args:
+      - "n"
+    run: true
+  watcher:
+    paths:
+    - ../../
+    extensions:
+    - go
+    ignored_paths:
+    - .git
+    - .realize
+    - vendor
